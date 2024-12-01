@@ -1,4 +1,3 @@
-import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import {
   mockUser,
@@ -10,19 +9,20 @@ import {
   mockRentStats,
   mockTenantStats
 } from './mockData';
+import api from '../config/api';
 
-const mock = new MockAdapter(axios, { delayResponse: 500 });
+const mock = new MockAdapter(api, { delayResponse: 500 });
 
 // Auth endpoints
-mock.onPost('/api/auth/login').reply(200, {
+mock.onPost('/auth/login').reply(200, {
   token: 'fake-jwt-token',
   user: mockUser
 });
 
-mock.onGet('/api/auth/me').reply(200, mockUser);
+mock.onGet('/auth/me').reply(200, mockUser);
 
 // Properties endpoints
-mock.onGet(/\/api\/properties.*/).reply(config => {
+mock.onGet(/\/properties.*/).reply(config => {
   const params = new URLSearchParams(config.url?.split('?')[1]);
   const ownerId = params.get('ownerId');
 
@@ -35,29 +35,29 @@ mock.onGet(/\/api\/properties.*/).reply(config => {
 });
 
 // Tenants endpoints
-mock.onGet(/\/api\/tenants\/\d+/).reply(config => {
+mock.onGet(/\/tenants\/\d+/).reply(config => {
   const id = config.url?.split('/').pop();
   const tenant = mockTenants.find(t => t.id === id);
   return tenant ? [200, tenant] : [404];
 });
 
-mock.onGet(/\/api\/tenants.*/).reply(200, {
+mock.onGet(/\/tenants.*/).reply(200, {
   tenants: mockTenants
 });
 
 // Owners endpoints
-mock.onGet(/\/api\/owners\/\d+/).reply(config => {
+mock.onGet(/\/owners\/\d+/).reply(config => {
   const id = config.url?.split('/').pop();
   const owner = mockTenants.find(t => t.id === id);
   return owner ? [200, owner] : [404];
 });
 
-mock.onGet(/\/api\/owners.*/).reply(200, {
+mock.onGet(/\/owners.*/).reply(200, {
   owners: mockTenants
 });
 
 // Leases endpoints
-mock.onGet(/\/api\/leases.*/).reply(config => {
+mock.onGet(/\/leases.*/).reply(config => {
   const params = new URLSearchParams(config.url?.split('?')[1]);
   const tenantId = params.get('tenantId');
   const ownerId = params.get('ownerId');
@@ -78,7 +78,7 @@ mock.onGet(/\/api\/leases.*/).reply(config => {
 });
 
 // Payments endpoints
-mock.onGet(/\/api\/payments.*/).reply(config => {
+mock.onGet(/\/payments.*/).reply(config => {
   const params = new URLSearchParams(config.url?.split('?')[1]);
   const tenantId = params.get('tenantId');
   const year = params.get('year');
@@ -109,10 +109,6 @@ mock.onGet(/\/api\/payments.*/).reply(config => {
 });
 
 // Stats endpoints
-mock.onGet('/api/stats').reply(200, mockStats);
-mock.onGet('/api/stats/rents').reply(200, mockRentStats);
-mock.onGet('/api/stats/tenants').reply(200, mockTenantStats);
-
-// Profile endpoints
-mock.onPatch('/api/users/profile').reply(200, mockUser);
-mock.onPost('/api/users/change-password').reply(200);
+mock.onGet('/stats').reply(200, mockStats);
+mock.onGet('/stats/rents').reply(200, mockRentStats);
+mock.onGet('/stats/tenants').reply(200, mockTenantStats);

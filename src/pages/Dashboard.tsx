@@ -1,4 +1,3 @@
-import React from 'react';
 import { Row, Col, Card, Statistic } from 'antd';
 import { Building2, Users, FileText, Wallet } from 'lucide-react';
 import { useQuery } from 'react-query';

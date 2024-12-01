@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
 import { User } from '../types/user';
+import api from '../config/api';
 
 interface AuthContextType {
   user: User | null;
@@ -19,49 +19,77 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigate = useNavigate();
   const location = useLocation();
 
+  const refreshAccessToken = async () => {
+    try {
+      const response = await api.post('/auth/refresh', {}, { withCredentials: true });
+      const { user } = response.data;
+      setUser(user);
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      setUser(null);
+    }
+  };
+
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      axios.get('/api/auth/me')
-        .then(response => {
+    let isMounted = true;
+
+    const fetchUser = async () => {
+      try {
+        const response = await api.get('/auth/me', { withCredentials: true });
+        if (isMounted) {
           setUser(response.data);
           if (location.pathname === '/login') {
             navigate('/app');
           }
-        })
-        .catch(() => {
-          localStorage.removeItem('token');
-          delete axios.defaults.headers.common['Authorization'];
-        })
-        .finally(() => {
+        }
+      } catch (error:any) {
+        if (isMounted) {
+          if (error.response?.status === 401) {
+            await refreshAccessToken();
+          } else {
+            setUser(null);
+          }
+        }
+      } finally {
+        if (isMounted) {
           setIsLoading(false);
-        });
-    } else {
-      setIsLoading(false);
-    }
-  }, [navigate, location]);
+        }
+      }
+    };
 
+    fetchUser();
+
+    return () => {
+      isMounted = false; // Nettoyage pour éviter les effets indésirables
+    };
+  }, [navigate, location]); 
+
+  // Fonction de connexion
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
-      const { token, user } = response.data;
-      localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser(user);
+      await api.post('/auth/login', { email, mot_de_passe: password }, { withCredentials: true });
+      const response = await api.get('/auth/me', { withCredentials: true });
+      setUser(response.data);
       navigate('/app');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de la connexion';
+      throw new Error(errorMessage);
+    }
+  };
+  
+
+  // Fonction de déconnexion
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout', {}, { withCredentials: true });
+      setUser(null);
+      navigate('/login');
     } catch (error) {
-      throw new Error('Identifiants invalides');
+      console.error('Erreur lors de la déconnexion', error);
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
-    setUser(null);
-    navigate('/login');
-  };
-
+  // Mise à jour des informations utilisateur
   const updateUserInfo = (updatedUser: User) => {
     setUser(updatedUser);
   };

@@ -1,18 +1,18 @@
 export interface User {
   id: string;
-  firstName: string;
-  lastName: string;
+  prenom: string; 
+  nom: string; 
   email: string;
-  role: 'admin' | 'manager' | 'accountant' | 'agent';
+  role: 'admin' | 'gestionnaire' | 'comptable' | 'agent';
   permissions: string[];
-  status: 'active' | 'inactive';
-  createdAt: string;
-  updatedAt: string;
+  status: 'actif' | 'inactif'; 
+  dateCreation: string; 
+  dateModification: string; 
 }
 
 export interface ProfileUpdateData {
-  firstName: string;
-  lastName: string;
+  prenom: string;
+  nom: string;
   email: string;
   currentPassword?: string;
   newPassword?: string;

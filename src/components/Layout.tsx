@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Layout as AntLayout, Menu, Avatar, Dropdown } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
@@ -102,8 +102,8 @@ const Layout = () => {
           </h2>
           <Dropdown menu={{ items: userMenu }} placement="bottomRight">
             <div className="flex items-center gap-3 cursor-pointer">
-              <Avatar className="bg-blue-900">{user?.firstName?.[0]}</Avatar>
-              <span className="text-gray-700">{user?.firstName} {user?.lastName}</span>
+              <Avatar className="bg-blue-900">{user?.prenom?.[0]}</Avatar>
+              <span className="text-gray-700">{user?.prenom} {user?.nom}</span>
             </div>
           </Dropdown>
         </Header>

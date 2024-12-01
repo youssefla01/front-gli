@@ -1,9 +1,9 @@
-import React from 'react';
 import { Card, Form, Input, Button, Divider, message } from 'antd';
 import { useAuth } from '../contexts/AuthContext';
 import { ProfileUpdateData } from '../types/user';
-import axios from 'axios';
 import { User2 } from 'lucide-react';
+import api from '../config/api';
+import { AxiosError } from 'axios';
 
 const Profile = () => {
   const { user, updateUserInfo } = useAuth();
@@ -12,9 +12,9 @@ const Profile = () => {
 
   const onUpdateProfile = async (values: ProfileUpdateData) => {
     try {
-      const response = await axios.patch('/api/users/profile', {
-        firstName: values.firstName,
-        lastName: values.lastName,
+      const response = await api.patch(`/administrateurs/${user?.id}`, {
+        prenom: values.prenom,
+        nom: values.nom,
         email: values.email,
       });
       updateUserInfo(response.data);
@@ -26,16 +26,22 @@ const Profile = () => {
 
   const onChangePassword = async (values: ProfileUpdateData) => {
     try {
-      await axios.post('/api/users/change-password', {
+      await api.patch(`/administrateurs/${user?.id}/change-password`, {
         currentPassword: values.currentPassword,
         newPassword: values.newPassword,
       });
       message.success('Mot de passe modifié avec succès');
       passwordForm.resetFields();
-    } catch (error) {
-      message.error('Erreur lors du changement de mot de passe');
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        const errorMessage = error.response?.data?.message || 'Erreur inconnue';
+        message.error(`Erreur: ${errorMessage}`);
+      } else {
+        message.error('Erreur de connexion au serveur');
+      }
     }
   };
+  
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -54,15 +60,15 @@ const Profile = () => {
           form={form}
           layout="vertical"
           initialValues={{
-            firstName: user?.firstName,
-            lastName: user?.lastName,
+            prenom: user?.prenom,
+            nom: user?.nom,
             email: user?.email,
           }}
           onFinish={onUpdateProfile}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Form.Item
-              name="firstName"
+              name="prenom"
               label="Prénom"
               rules={[{ required: true, message: 'Le prénom est requis' }]}
             >
@@ -70,7 +76,7 @@ const Profile = () => {
             </Form.Item>
 
             <Form.Item
-              name="lastName"
+              name="nom"
               label="Nom"
               rules={[{ required: true, message: 'Le nom est requis' }]}
             >

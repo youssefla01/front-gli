@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Form, Input, Button, Card, App } from 'antd';
 import { useAuth } from '../contexts/AuthContext';
 import { Building2 } from 'lucide-react';
@@ -11,10 +11,11 @@ const Login = () => {
   const onFinish = async (values: { email: string; password: string }) => {
     try {
       await login(values.email, values.password);
-    } catch (error) {
-      message.error("Échec de la connexion. Veuillez vérifier vos identifiants.");
+    } catch (error: any) {
+      message.error(error.message || "Échec de la connexion. Veuillez vérifier vos identifiants.");
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
