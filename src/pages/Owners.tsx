@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from 'react-query';
-import { 
-  Table, Button, Input, Modal, message, 
-  Tooltip, Space 
-} from 'antd';
+import { Table, Button, Input, Modal, message, Tooltip, Space } from 'antd';
 import { Plus, Search, Mail, Phone, Edit2, Trash2, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import TenantForm from '../components/tenants/TenantForm';
-import { Tenant, TenantFormData } from '../types/tenant';
+import OwnerForm from '../components/owners/OwnerForm';
+import { Owner, OwnerFormData } from '../types/owner';
+import api from '../config/api';
 
 const { Search: AntSearch } = Input;
 
@@ -16,46 +13,46 @@ const Owners = () => {
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedOwner, setSelectedOwner] = useState<Tenant | null>(null);
+  const [selectedOwner, setSelectedOwner] = useState<Owner | null>(null);
 
   const { data: owners = [], isLoading, refetch } = useQuery(
-    ['owners', searchTerm],
+    ['proprietaires', searchTerm],
     async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
-      const response = await axios.get(`/api/owners?${params}`);
-      return response.data?.owners || [];
+      const response = await api.get(`/proprietaires`,{ params });
+      return response.data || [];
     }
   );
 
-  const handleCreateOrUpdate = async (values: TenantFormData) => {
+  const handleCreateOrUpdate = async (values: OwnerFormData ) => {
     try {
       if (selectedOwner) {
-        await axios.patch(`/api/owners/${selectedOwner.id}`, values);
+        await api.patch(`/proprietaires/${selectedOwner.id}`, values);
         message.success('Propriétaire modifié avec succès');
       } else {
-        await axios.post('/api/owners', values);
+        await api.post('/proprietaires', values);
         message.success('Propriétaire créé avec succès');
       }
       setIsModalVisible(false);
       setSelectedOwner(null);
       refetch();
     } catch (error) {
-      message.error('Une erreur est survenue');
+      message.error('Une erreur est survenue. Veuillez réessayer.');
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`/api/owners/${id}`);
+      await api.delete(`/proprietaires/${id}`);
       message.success('Propriétaire supprimé avec succès');
       refetch();
     } catch (error) {
-      message.error('Une erreur est survenue');
+      message.error('Une erreur est survenue. Veuillez réessayer.');
     }
   };
 
-  const handleRowClick = (record: Tenant) => {
+  const handleRowClick = (record: Owner) => {
     navigate(`/app/owners/${record.id}`);
   };
 
@@ -63,10 +60,16 @@ const Owners = () => {
     {
       title: 'Nom',
       key: 'name',
-      render: (_: any, record: Tenant) => (
+      dataIndex: 'nom',
+      filters: [
+        { text: 'Dupont', value: 'Dupont' },
+        { text: 'Martin', value: 'Martin' },
+      ],
+      onFilter: (value: any, record: Owner) => record.nom.includes(value),
+      render: (_: any, record: Owner) => (
         <div className="cursor-pointer hover:text-blue-900">
           <div className="font-medium">
-            {record.lastName} {record.firstName}
+            {record.nom} {record.prenom}
           </div>
         </div>
       ),
@@ -74,26 +77,26 @@ const Owners = () => {
     {
       title: 'Contact',
       key: 'contact',
-      render: (_: any, record: Tenant) => (
+      render: (_: any, record: Owner) => (
         <Space direction="vertical">
           <div className="flex items-center gap-2">
             <Mail className="w-4 h-4 text-gray-400" />
-            <a 
-              href={`mailto:${record.email}`} 
+            <a
+              href={`mailto:${record.email}`}
               className="text-blue-900 hover:underline"
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
             >
               {record.email}
             </a>
           </div>
           <div className="flex items-center gap-2">
             <Phone className="w-4 h-4 text-gray-400" />
-            <a 
-              href={`tel:${record.phone}`} 
+            <a
+              href={`tel:${record.telephone}`}
               className="text-blue-900 hover:underline"
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
             >
-              {record.phone}
+              {record.telephone}
             </a>
           </div>
         </Space>
@@ -102,6 +105,16 @@ const Owners = () => {
     {
       title: 'Biens',
       key: 'properties',
+      dataIndex: 'propertiesCount',
+      filters: [
+        { text: '0 bien', value: 0 },
+        { text: '1 bien', value: 1 },
+        { text: '2 biens ou plus', value: 2 },
+      ],
+      onFilter: (value: any, record: any) => {
+        if (value === 2) return record.propertiesCount >= 2;
+        return record.propertiesCount === value;
+      },
       render: (_: any, record: any) => (
         <div className="flex items-center gap-2">
           <Home className="w-4 h-4 text-gray-400" />
@@ -112,7 +125,7 @@ const Owners = () => {
     {
       title: 'Actions',
       key: 'actions',
-      render: (_: any, record: Tenant) => (
+      render: (_: any, record: Owner) => (
         <Space>
           <Tooltip title="Modifier">
             <Button
@@ -138,6 +151,7 @@ const Owners = () => {
       ),
     },
   ];
+  
 
   return (
     <div className="space-y-6">
@@ -145,7 +159,7 @@ const Owners = () => {
         <AntSearch
           placeholder="Rechercher un propriétaire..."
           allowClear
-          onChange={e => setSearchTerm(e.target.value)}
+          onChange={(e) => setSearchTerm(e.target.value)}
           className="w-64"
           prefix={<Search className="w-4 h-4 text-gray-400" />}
         />
@@ -172,7 +186,7 @@ const Owners = () => {
         }}
         onRow={(record) => ({
           onClick: () => handleRowClick(record),
-          className: 'cursor-pointer hover:bg-gray-50'
+          className: 'cursor-pointer hover:bg-gray-50',
         })}
       />
 
@@ -186,7 +200,7 @@ const Owners = () => {
         footer={null}
         width={800}
       >
-        <TenantForm
+        <OwnerForm
           initialValues={selectedOwner || undefined}
           onSubmit={handleCreateOrUpdate}
           onCancel={() => {

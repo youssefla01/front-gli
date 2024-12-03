@@ -1,10 +1,10 @@
-import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { Card, Table, Tag, Statistic, Row, Col, List, Avatar, Spin } from 'antd';
 import { User2, Mail, Phone, Building2, Euro, Wallet, Home } from 'lucide-react';
-import axios from 'axios';
+import api from 'api';
 import dayjs from 'dayjs';
+import api from '../config/api';
 
 const OwnerDetail = () => {
   const { id } = useParams();
@@ -12,7 +12,7 @@ const OwnerDetail = () => {
   const { data: owner, isLoading: isLoadingOwner } = useQuery(
     ['owner', id],
     async () => {
-      const response = await axios.get(`/api/owners/${id}`);
+      const response = await api.get(`/proprietaires/${id}`);
       return response.data;
     },
     { enabled: !!id }
@@ -21,7 +21,7 @@ const OwnerDetail = () => {
   const { data: properties = [], isLoading: isLoadingProperties } = useQuery(
     ['owner-properties', id],
     async () => {
-      const response = await axios.get(`/api/properties?ownerId=${id}`);
+      const response = await api.get(`/api/properties?ownerId=${id}`);
       return response.data?.properties || [];
     },
     { enabled: !!id }
@@ -30,7 +30,7 @@ const OwnerDetail = () => {
   const { data: leases = [], isLoading: isLoadingLeases } = useQuery(
     ['owner-leases', id],
     async () => {
-      const response = await axios.get(`/api/leases?ownerId=${id}`);
+      const response = await api.get(`/api/leases?ownerId=${id}`);
       return response.data?.leases || [];
     },
     { enabled: !!id }
@@ -39,7 +39,7 @@ const OwnerDetail = () => {
   const { data: payments = [], isLoading: isLoadingPayments } = useQuery(
     ['owner-payments', id],
     async () => {
-      const response = await axios.get(`/api/payments?ownerId=${id}`);
+      const response = await api.get(`/api/payments?ownerId=${id}`);
       return response.data?.payments || [];
     },
     { enabled: !!id }
@@ -149,7 +149,7 @@ const OwnerDetail = () => {
           </div>
           <div className="flex-1">
             <h1 className="text-2xl font-semibold text-gray-800">
-              {owner.lastName} {owner.firstName}
+              {owner.nom} {owner.prenom}
             </h1>
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex items-center gap-2 text-gray-600">
@@ -160,8 +160,8 @@ const OwnerDetail = () => {
               </div>
               <div className="flex items-center gap-2 text-gray-600">
                 <Phone className="w-4 h-4" />
-                <a href={`tel:${owner.phone}`} className="hover:text-blue-900">
-                  {owner.phone}
+                <a href={`tel:${owner.telephone}`} className="hover:text-blue-900">
+                  {owner.telephone} - {owner.numero_urgence}
                 </a>
               </div>
             </div>
