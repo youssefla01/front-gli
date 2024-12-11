@@ -11,6 +11,7 @@
     "test": "jest --config jest.config.mjs"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.5.2",
     "antd": "^5.15.1",
     "axios": "^1.6.7",
     "dayjs": "^1.11.10",

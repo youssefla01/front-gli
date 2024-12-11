@@ -1,5 +1,5 @@
-import React from 'react';
-import { Form, Input, DatePicker, InputNumber } from 'antd';
+import React, { useEffect } from 'react';
+import { Form, Input, DatePicker, InputNumber,Select } from 'antd';
 import { TenantFormData } from '../../types/tenant';
 import dayjs from 'dayjs';
 
@@ -14,39 +14,45 @@ const TenantForm: React.FC<TenantFormProps> = ({
   initialValues,
   onSubmit,
   onCancel,
-  loading
+  loading,
 }) => {
   const [form] = Form.useForm();
+  console.log(initialValues);
 
   const handleSubmit = (values: any) => {
     const formattedValues = {
       ...values,
-      birthDate: values.birthDate.format('YYYY-MM-DD'),
+      date_naissance: values.date_naissance.format('YYYY-MM-DD') ,
     };
     onSubmit(formattedValues);
   };
-
+ 
   return (
+    
     <Form
+    
       form={form}
       layout="vertical"
-      initialValues={initialValues ? {
-        ...initialValues,
-        birthDate: dayjs(initialValues.birthDate),
-      } : undefined}
+      initialValues={
+        initialValues
+          ? {
+              ...initialValues,
+              date_naissance: dayjs(initialValues?.date_naissance),
+            }
+          : undefined
+      }
       onFinish={handleSubmit}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Form.Item
-          name="firstName"
+          name="prenom"
           label="Prénom"
           rules={[{ required: true, message: 'Le prénom est requis' }]}
         >
           <Input />
         </Form.Item>
-
         <Form.Item
-          name="lastName"
+          name="nom"
           label="Nom"
           rules={[{ required: true, message: 'Le nom est requis' }]}
         >
@@ -60,14 +66,13 @@ const TenantForm: React.FC<TenantFormProps> = ({
           label="Email"
           rules={[
             { required: true, message: "L'email est requis" },
-            { type: 'email', message: 'Email invalide' }
+            { type: 'email', message: 'Email invalide' },
           ]}
         >
           <Input />
         </Form.Item>
-
         <Form.Item
-          name="phone"
+          name="telephone"
           label="Téléphone"
           rules={[{ required: true, message: 'Le téléphone est requis' }]}
         >
@@ -77,34 +82,126 @@ const TenantForm: React.FC<TenantFormProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Form.Item
-          name="birthDate"
-          label="Date de naissance"
-          rules={[{ required: true, message: 'La date de naissance est requise' }]}
+          name="adresse"
+          label="Adresse"
+          rules={[{ required: true, message: "L'adresse est requise" }]}
         >
-          <DatePicker className="w-full" format="DD/MM/YYYY" />
+          <Input />
         </Form.Item>
-
         <Form.Item
-          name="occupation"
-          label="Profession"
-          rules={[{ required: true, message: 'La profession est requise' }]}
+          name="cin"
+          label="CIN"
+          rules={[{ required: true, message: 'Le CIN est requis' }]}
         >
           <Input />
         </Form.Item>
       </div>
 
-      <Form.Item
-        name="monthlyIncome"
-        label="Revenu mensuel (€)"
-        rules={[{ required: true, message: 'Le revenu mensuel est requis' }]}
-      >
-        <InputNumber
-          className="w-full"
-          min={0}
-          formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
-          parser={value => value!.replace(/\s?/g, '')}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Form.Item
+          name="piece_identite"
+          label="Pièce d'identité"
+          rules={[{ required: true, message: "La pièce d'identité est requise" }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          name="piece_jointe"
+          label="Pièce jointe"
+          rules={[{ required: true, message: 'La pièce jointe est requise' }]}
+        >
+          <Input />
+        </Form.Item>
+      </div>
+
+      <Form.Item name="commentaire" label="Commentaire">
+        <Input.TextArea rows={3} />
       </Form.Item>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Form.Item
+          name="situation_familiale"
+          label="Situation familiale"
+          rules={[{ required: true, message: 'La situation familiale est requise' }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          name="nombre_enfants"
+          label="Nombre d'enfants"
+          rules={[{ required: true, message: "Le nombre d'enfants est requis" }]}
+        >
+          <InputNumber className="w-full" min={0} />
+        </Form.Item>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Form.Item
+          name="profession"
+          label="Profession"
+          rules={[{ required: true, message: 'La profession est requise' }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          name="nationalite"
+          label="Nationalité"
+          rules={[{ required: true, message: 'La nationalité est requise' }]}
+        >
+          <Input />
+        </Form.Item>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Form.Item
+          name="statut"
+          label="Statut"
+          rules={[{ required: true, message: 'Le statut est requis' }]}
+        >
+          <Select placeholder="Sélectionnez un statut">
+            <Select.Option value="Actif">Actif</Select.Option>
+            <Select.Option value="Inactif">Inactif</Select.Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item
+          name="date_naissance"
+          label="Date de naissance"
+          rules={[{ required: true, message: 'La date de naissance est requise' }]}
+        >
+          <DatePicker className="w-full" format="DD/MM/YYYY" />
+        </Form.Item>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Form.Item
+          name="lieu_naissance"
+          label="Lieu de naissance"
+          rules={[{ required: true, message: 'Le lieu de naissance est requis' }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          name="contact_urgence"
+          label="Contact d'urgence"
+          rules={[{ required: true, message: "Le contact d'urgence est requis" }]}
+        >
+          <Input />
+        </Form.Item>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Form.Item
+          name="genre"
+          label="Genre"
+          rules={[{ required: true, message: 'Le genre est requis' }]}
+        >
+          <Select placeholder="Sélectionnez un genre">
+            <Select.Option value="Homme">Homme</Select.Option>
+            <Select.Option value="Femme">Femme</Select.Option>
+          </Select>
+        </Form.Item>
+      </div>
 
       <div className="flex justify-end gap-2">
         <button

@@ -1,15 +1,13 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { useQuery } from 'react-query';
-import { 
-  Table, Button, Input, Modal, message, 
-  Tooltip, Tag, Space 
-} from 'antd';
+import { Table, Button, Input, Modal, message,Tooltip, Tag, Space , } from 'antd';
 import { Plus, Search, Mail, Phone, Edit2, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import TenantForm from '../components/tenants/TenantForm';
 import { Tenant, TenantFormData } from '../types/tenant';
 import dayjs from 'dayjs';
+import api from '../config/api';
+
 
 const { Search: AntSearch } = Input;
 
@@ -20,22 +18,24 @@ const Tenants = () => {
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
 
   const { data: tenants = [], isLoading, refetch } = useQuery(
-    ['tenants', searchTerm],
+    ['locataires', searchTerm],
     async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
-      const response = await axios.get(`/api/tenants?${params}`);
-      return response.data?.tenants || [];
+      const response = await api.get(`/locataires`,{ params });
+      return response.data || [];
     }
   );
 
   const handleCreateOrUpdate = async (values: TenantFormData) => {
     try {
+      console.log('Selected Tenant:', selectedTenant);
       if (selectedTenant) {
-        await axios.patch(`/api/tenants/${selectedTenant.id}`, values);
+        console.log(1);
+        await api.patch(`/locataires/${selectedTenant.id}`, values);
         message.success('Locataire modifié avec succès');
       } else {
-        await axios.post('/api/tenants', values);
+        await api.post('/locataires', values);
         message.success('Locataire créé avec succès');
       }
       setIsModalVisible(false);
@@ -48,7 +48,7 @@ const Tenants = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`/api/tenants/${id}`);
+      await api.delete(`/locataires/${id}`);
       message.success('Locataire supprimé avec succès');
       refetch();
     } catch (error) {
@@ -57,7 +57,7 @@ const Tenants = () => {
   };
 
   const handleRowClick = (record: Tenant) => {
-    navigate(`/app/tenants/${record.id}`);
+    navigate(`/locataires/${record.id}`);
   };
 
   const columns = [
@@ -66,10 +66,29 @@ const Tenants = () => {
       key: 'name',
       render: (_: any, record: Tenant) => (
         <div className="cursor-pointer hover:text-blue-900">
-          <div className="font-medium">{record.lastName} {record.firstName}</div>
+          <div className="font-medium">{record.nom} {record.prenom}</div>
           <div className="text-sm text-gray-500">
-            Né(e) le {dayjs(record.birthDate).format('DD/MM/YYYY')}
+            Né(e) le {dayjs(record.date_naissance).format('DD/MM/YYYY')}
           </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Cin ',
+      key: 'name',
+      width: 150,
+      render: (_: any, record: Tenant) => (
+          <div className="flex items-center gap-2">
+          <div className="font-medium">{record.cin}</div>
+        </div>
+      ),
+    },
+    {
+      title: 'Profession',
+      key: 'name',
+      render: (_: any, record: Tenant) => (
+          <div className="flex items-center gap-2">
+          <div className="font-medium"> {record.profession}</div>
         </div>
       ),
     },
@@ -91,31 +110,21 @@ const Tenants = () => {
           <div className="flex items-center gap-2">
             <Phone className="w-4 h-4 text-gray-400" />
             <a 
-              href={`tel:${record.phone}`} 
+              href={`tel:${record.telephone}`} 
               className="text-blue-900 hover:underline"
               onClick={e => e.stopPropagation()}
             >
-              {record.phone}
+              {record.telephone}
             </a>
           </div>
         </Space>
       ),
     },
     {
-      title: 'Profession',
-      dataIndex: 'occupation',
-      key: 'occupation',
-    },
-    {
-      title: 'Revenu mensuel',
-      key: 'monthlyIncome',
+      title: 'Statut',
+      key: 'statut',
       render: (_: any, record: Tenant) => (
-        <Tag color="green">
-          {new Intl.NumberFormat('fr-FR', {
-            style: 'currency',
-            currency: 'EUR'
-          }).format(record.monthlyIncome)}
-        </Tag>
+        record.statut === 'Actif' ? <Tag color="green">{ record.statut }</Tag> :<Tag color="red">{ record.statut }</Tag>
       ),
     },
     {
