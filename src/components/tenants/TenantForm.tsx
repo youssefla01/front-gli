@@ -18,7 +18,16 @@ const TenantForm: React.FC<TenantFormProps> = ({
 }) => {
   const [form] = Form.useForm();
   console.log(initialValues);
-
+  useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue({
+        ...initialValues,
+        date_naissance: dayjs(initialValues.date_naissance),
+      });
+    } else {
+      form.resetFields();
+    }
+  }, [initialValues, form]);
   const handleSubmit = (values: any) => {
     const formattedValues = {
       ...values,
