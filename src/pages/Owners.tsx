@@ -15,7 +15,7 @@ const Owners = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOwner, setSelectedOwner] = useState<Owner | null>(null);
 
-  const { data: owners = [], isLoading, refetch } = useQuery(
+  const { data: proprietaires , isLoading, refetch } = useQuery(
     ['proprietaires', searchTerm],
     async () => {
       const params = new URLSearchParams();
@@ -55,6 +55,14 @@ const Owners = () => {
   const handleRowClick = (record: Owner) => {
     navigate(`/app/owners/${record.id}`);
   };
+
+    const filteredProprietaires = proprietaires && proprietaires.length > 0
+    ? proprietaires.filter((proprietaire: Owner) =>
+        `${proprietaire.nom} ${proprietaire.prenom} ${proprietaire.email}`
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      )
+    : [];
 
   const columns = [
     {
@@ -177,7 +185,7 @@ const Owners = () => {
 
       <Table
         columns={columns}
-        dataSource={owners}
+        dataSource={filteredProprietaires}
         loading={isLoading}
         rowKey="id"
         pagination={{

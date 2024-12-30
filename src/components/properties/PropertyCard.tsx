@@ -9,7 +9,7 @@ interface PropertyCardProps {
 }
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
-  const getConditionColor = (condition: Property['condition']) => {
+  const getConditionColor = (condition: Property['etat']) => {
     const colors = {
       new: 'green',
       good: 'blue',
@@ -48,8 +48,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
       cover={
         <div className="relative h-48 overflow-hidden">
           <img
-            src={property.image || getDefaultImage(property.type)}
-            alt={property.address}
+            src={property.photos?.[0] || getDefaultImage(property.type)}
+            alt={property.addresse}
             className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
           />
           <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/50 to-transparent">
@@ -57,10 +57,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
               <Tag icon={<Building2 className="w-3 h-3" />} className="bg-white/90">
                 {getTypeLabel(property.type)}
               </Tag>
-              <Tag color={getConditionColor(property.condition)} className="bg-white/90">
-                {property.condition === 'new' ? 'Neuf' : 
-                 property.condition === 'good' ? 'Bon état' :
-                 property.condition === 'renovate' ? 'À rénover' : 'Mauvais état'}
+              <Tag color={getConditionColor(property.etat)} className="bg-white/90">
+                {property.etat === 'new' ? 'Neuf' : 
+                 property.etat === 'good' ? 'Bon état' :
+                 property.etat === 'renovate' ? 'À rénover' : 'Mauvais état'}
               </Tag>
             </div>
           </div>
@@ -68,7 +68,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
       }
     >
       <div className="space-y-4">
-        <p className="text-gray-600 line-clamp-2 min-h-[3rem]">{property.address}</p>
+        <p className="text-gray-600 line-clamp-2 min-h-[3rem]">{property.addresse}</p>
 
         <div className="grid grid-cols-2 gap-2">
           <Tooltip title="Surface">
@@ -81,7 +81,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
           <Tooltip title="Pièces">
             <div className="flex items-center gap-1 text-gray-600">
               <DoorOpen className="w-4 h-4" />
-              <span>{property.rooms} pièce{property.rooms > 1 ? 's' : ''}</span>
+              <span>{property.nb_pieces} pièce{property.nb_pieces > 1 ? 's' : ''}</span>
             </div>
           </Tooltip>
         </div>
@@ -89,7 +89,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
         <div className="flex items-center gap-1 text-lg font-semibold text-blue-900">
           <Euro className="w-5 h-5" />
           <span>
-            {new Intl.NumberFormat('fr-FR').format(property.estimatedPrice)}
+            {new Intl.NumberFormat('fr-FR').format(property.prix)}
           </span>
         </div>
       </div>

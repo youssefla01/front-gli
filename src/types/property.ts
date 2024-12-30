@@ -1,14 +1,14 @@
 export interface Property {
   id: string;
   type: 'apartment' | 'house' | 'commercial' | 'land';
-  address: string;
+  addresse: string;
   description: string;
   surface: number;
-  rooms: number;
-  condition: 'new' | 'good' | 'renovate' | 'poor';
-  estimatedPrice: number;
-  ownerId: string;
-  image?: string;
+  nb_pieces: number;
+  etat: 'new' | 'good' | 'renovate' | 'poor';
+  prix: number;
+  proprietaire_id: string;
+  photos?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -84,7 +84,7 @@ const Layout = () => {
       >
         <div className="h-16 flex items-center justify-center border-b border-gray-200">
           <h1 className={`text-blue-900 font-bold transition-all duration-200 ${collapsed ? 'text-xl' : 'text-2xl'}`}>
-            {collapsed ? 'BS' : 'BabSouss.immo'}
+            {collapsed ? 'LP' : 'LocaPro.immo'}
           </h1>
         </div>
         <Menu

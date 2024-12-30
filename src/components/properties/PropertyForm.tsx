@@ -4,6 +4,7 @@ import { UploadOutlined } from '@ant-design/icons';
 import { PropertyFormData } from '../../types/property';
 import { useQuery } from 'react-query';
 import axios from 'axios';
+import api from '../../config/api';
 
 interface PropertyFormProps {
   initialValues?: PropertyFormData;
@@ -21,7 +22,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({
   const [form] = Form.useForm();
 
   const { data: owners = [] } = useQuery('owners', async () => {
-    const response = await axios.get('/api/owners');
+    const response = await api.get('/owners');
     return response.data?.owners || [];
   });
 

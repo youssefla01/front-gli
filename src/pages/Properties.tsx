@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from 'react-query';
 import { 
   Button, Input, Select, Row, Col, Modal, 
@@ -10,6 +10,7 @@ import PropertyCard from '../components/properties/PropertyCard';
 import PropertyForm from '../components/properties/PropertyForm';
 import { Property, PropertyFormData } from '../types/property';
 import { transformResponse } from '../utils/queryUtils';
+import api from '../config/api';
 
 const { Search: AntSearch } = Input;
 
@@ -20,15 +21,15 @@ const Properties = () => {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const { message } = App.useApp();
 
-  const { data: properties = [], isLoading, refetch } = useQuery(
-    ['properties', searchTerm, typeFilter],
+  const { data: biens = [], isLoading, refetch } = useQuery(
+    ['biens', searchTerm, typeFilter],
     async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
       if (typeFilter) params.append('type', typeFilter);
       
-      const response = await axios.get(`/api/properties?${params}`);
-      return transformResponse(response.data?.properties || []);
+      const response = await api.get(`/biens`,{ params });
+      return transformResponse(response.data || []);
     }
   );
 
@@ -94,9 +95,9 @@ const Properties = () => {
         <div className="flex justify-center py-12">
           <Spin size="large" />
         </div>
-      ) : properties && properties.length > 0 ? (
+      ) : biens && biens.length > 0 ? (
         <Row gutter={[16, 16]}>
-          {properties.map((property: Property) => (
+          {biens.map((property: Property) => (
             <Col xs={24} sm={12} lg={8} xl={6} key={property.id}>
               <PropertyCard
                 property={property}

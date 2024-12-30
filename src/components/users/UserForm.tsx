@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { Form, Input, Select, Button, Checkbox } from 'antd';
-import { UserFormData } from '../../types/user';
+import React, { useEffect } from "react";
+import { Form, Input, Select, Button } from "antd";
+import { UserFormData } from "../../types/user";
 
 interface UserFormProps {
   initialValues?: UserFormData;
@@ -13,49 +13,56 @@ const UserForm: React.FC<UserFormProps> = ({
   initialValues,
   onSubmit,
   onCancel,
-  loading
+  loading,
 }) => {
   const [form] = Form.useForm();
-  
+
   useEffect(() => {
     if (initialValues) {
-      form.setFieldsValue(initialValues); 
+      form.setFieldsValue(initialValues);
     } else {
-      form.resetFields(); 
+      form.resetFields();
     }
   }, [initialValues, form]);
-  // const permissions = [
-  //   { label: 'Gérer les biens', value: 'manage_properties' },
-  //   { label: 'Gérer les locataires', value: 'manage_tenants' },
-  //   { label: 'Gérer les propriétaires', value: 'manage_owners' },
-  //   { label: 'Gérer les baux', value: 'manage_leases' },
-  //   { label: 'Gérer les paiements', value: 'manage_payments' },
-  //   { label: 'Gérer la comptabilité', value: 'manage_accounting' },
-  //   { label: 'Gérer les utilisateurs', value: 'manage_users' },
-  // ];
 
   return (
     <Form
       form={form}
       layout="vertical"
       initialValues={initialValues}
-      onFinish={onSubmit}
+      onFinish={(values) => {
+        onSubmit(values);
+      }}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Form.Item
-          name="prenom"
-          label="Prénom"
-          rules={[{ required: true, message: 'Le prénom est requis' }]}
+          name="nom"
+          label="Nom"
+          rules={[
+            { required: true, message: "Le nom est requis" },
+            {
+              pattern: /^[a-zA-Z]+$/,
+              message: "Le nom ne peut contenir que des lettres",
+            },
+            { min: 2, message: "Le nom doit avoir au moins 2 caractères" },
+          ]}
         >
-          <Input />
+          <Input placeholder="Entrez votre nom" />
         </Form.Item>
 
         <Form.Item
-          name="nom"
-          label="Nom"
-          rules={[{ required: true, message: 'Le nom est requis' }]}
+          name="prenom"
+          label="Prénom"
+          rules={[
+            { required: true, message: "Le prénom est requis" },
+            {
+              pattern: /^[a-zA-Z]+$/,
+              message: "Le prénom ne peut contenir que des lettres",
+            },
+            { min: 2, message: "Le prénom doit avoir au moins 2 caractères" },
+          ]}
         >
-          <Input />
+          <Input placeholder="Entrez votre prénom" />
         </Form.Item>
       </div>
 
@@ -64,10 +71,10 @@ const UserForm: React.FC<UserFormProps> = ({
         label="Email"
         rules={[
           { required: true, message: "L'email est requis" },
-          { type: 'email', message: 'Email invalide' }
+          { type: "email", message: "Veuillez saisir un email valide" },
         ]}
       >
-        <Input />
+        <Input placeholder="Entrez votre email (exemple@domaine.com)" />
       </Form.Item>
 
       {!initialValues && (
@@ -75,40 +82,45 @@ const UserForm: React.FC<UserFormProps> = ({
           name="mot_de_passe"
           label="Mot de passe"
           rules={[
-            { required: true, message: 'Le mot de passe est requis' },
-            { min: 8, message: 'Le mot de passe doit contenir au moins 8 caractères' }
+            { required: true, message: "Le mot de passe est requis" },
+            // { min: 8, message: 'Le mot de passe doit contenir au moins 8 caractères' },
+            {
+              pattern: /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
+              message:
+                "Le mot de passe doit inclure au moins une majuscule, un chiffre et un caractère spécial",
+            },
           ]}
         >
-          <Input.Password />
+          <Input.Password placeholder="Entrez un mot de passe sécurisé" />
         </Form.Item>
       )}
 
       <Form.Item
         name="role"
         label="Rôle"
-        rules={[{ required: true, message: 'Le rôle est requis' }]}
+        rules={[
+          { required: true, message: "Le rôle est requis" },
+          {
+            validator: (_, value) =>
+              value &&
+              ["admin", "manager", "accountant", "agent"].includes(value)
+                ? Promise.resolve()
+                : Promise.reject(new Error("Rôle invalide")),
+          },
+        ]}
       >
-        <Select>
+        <Select placeholder="Sélectionnez un rôle">
           <Select.Option value="admin">Admin</Select.Option>
-          {/* <Select.Option value="manager">Gestionnaire</Select.Option>
+          <Select.Option value="manager">Gestionnaire</Select.Option>
           <Select.Option value="accountant">Comptable</Select.Option>
-          <Select.Option value="agent">Agent</Select.Option> */}
+          <Select.Option value="agent">Agent</Select.Option>
         </Select>
       </Form.Item>
 
-      {/* <Form.Item
-        name="permissions"
-        label="Permissions"
-      >
-        <Checkbox.Group options={permissions} />
-      </Form.Item> */}
-
       <div className="flex justify-end gap-2">
-        <Button onClick={onCancel}>
-          Annuler
-        </Button>
+        <Button onClick={onCancel}>Annuler</Button>
         <Button type="primary" htmlType="submit" loading={loading}>
-          {initialValues ? 'Modifier' : 'Créer'}
+          {initialValues ? "Modifier" : "Créer"}
         </Button>
       </div>
     </Form>

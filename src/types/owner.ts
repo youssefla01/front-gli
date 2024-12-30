@@ -11,6 +11,7 @@ export interface Owner {
     piece_jointe?: string;
     date_creation: string;
     date_mise_a_jour: string;
+    
   }
   
   export interface OwnerFormData extends Omit<Owner, 'id' | 'date_creation' | 'date_mise_a_jour'> {}
