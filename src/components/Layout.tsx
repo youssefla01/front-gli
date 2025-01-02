@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Layout as AntLayout, Menu, Avatar, Dropdown } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
@@ -6,14 +6,35 @@ import {
   LayoutDashboard, LogOut, Settings, UserCog, Calculator
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import NotificationBell from './notifications/NotificationBell';
+import { mockNotifications } from '../services/mockData';
 
 const { Header, Sider, Content } = AntLayout;
 
 const Layout = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [notifications, setNotifications] = useState(mockNotifications);
   const navigate = useNavigate();
   const location = useLocation();
   const { logout, user } = useAuth();
+
+  // Détermine si nous sommes sur une page de détail propriétaire
+  const isOwnerDetail = location.pathname.startsWith('/app/owners/') && location.pathname !== '/app/owners';
+
+  // Détermine la clé de menu active
+  const getActiveMenuKey = () => {
+    if (isOwnerDetail) return '/app/owners';
+    return location.pathname;
+  };
+
+  // Détermine le titre de la page
+  const getPageTitle = () => {
+    const menuItem = menuItems.find(item => item.key === getActiveMenuKey());
+    if (isOwnerDetail) {
+      return 'Détail propriétaire';
+    }
+    return menuItem?.label || 'Paramètres';
+  };
 
   const menuItems = [
     {
@@ -74,6 +95,28 @@ const Layout = () => {
     },
   ];
 
+  const handleMarkAsRead = (id: string) => {
+    setNotifications(prev =>
+      prev.map(n => n.id === id ? { ...n, read: true } : n)
+    );
+  };
+
+  const handleMarkAllAsRead = () => {
+    setNotifications(prev =>
+      prev.map(n => ({ ...n, read: true }))
+    );
+  };
+
+  const handleDelete = (id: string) => {
+    setNotifications(prev =>
+      prev.filter(n => n.id !== id)
+    );
+  };
+
+  const handleNavigate = (link: string) => {
+    navigate(link);
+  };
+
   return (
     <AntLayout className="min-h-screen">
       <Sider 
@@ -84,12 +127,12 @@ const Layout = () => {
       >
         <div className="h-16 flex items-center justify-center border-b border-gray-200">
           <h1 className={`text-blue-900 font-bold transition-all duration-200 ${collapsed ? 'text-xl' : 'text-2xl'}`}>
-            {collapsed ? 'LP' : 'LocaPro.immo'}
+            {collapsed ? 'BS' : 'BabSouss.immo'}
           </h1>
         </div>
         <Menu
           mode="inline"
-          selectedKeys={[location.pathname]}
+          selectedKeys={[getActiveMenuKey()]}
           items={menuItems}
           onClick={({ key }) => navigate(key)}
           className="border-none"
@@ -98,15 +141,24 @@ const Layout = () => {
       <AntLayout>
         <Header className="bg-white px-6 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-800">
-            {menuItems.find(item => item.key === location.pathname)?.label || 'Paramètres'}
+            {getPageTitle()}
           </h2>
+          <div className="flex items-center gap-4">
+            <NotificationBell
+              notifications={notifications}
+              onMarkAllAsRead={handleMarkAllAsRead}
+              onMarkAsRead={handleMarkAsRead}
+              onDelete={handleDelete}
+              onNavigate={handleNavigate}
+            />
           <Dropdown menu={{ items: userMenu }} placement="bottomRight">
             <div className="flex items-center gap-3 cursor-pointer">
               <Avatar className="bg-blue-900">{user?.prenom?.[0]}</Avatar>
               <span className="text-gray-700">{user?.prenom} {user?.nom}</span>
             </div>
           </Dropdown>
-        </Header>
+          </div>
+          </Header>
         <Content className="p-6 bg-gray-50">
           <Outlet />
         </Content>

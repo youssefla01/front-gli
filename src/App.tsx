@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ConfigProvider, App as AntApp } from 'antd';
@@ -17,6 +17,7 @@ import Users from './pages/Users';
 import Accounting from './pages/Accounting';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
+import LoadingScreen from './components/common/LoadingScreen';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { serializeData } from './utils/queryUtils';
 
@@ -53,7 +54,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div>Chargement...</div>;
+    return <LoadingScreen />;
   }
 
   if (!user) {

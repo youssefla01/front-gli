@@ -2,20 +2,26 @@
 import { Form, Input, Button, Card, App } from 'antd';
 import { useAuth } from '../contexts/AuthContext';
 import { Building2 } from 'lucide-react';
+import { useState } from 'react';
+import LoadingScreen from '../components/common/LoadingScreen';
 
 const Login = () => {
   const { login } = useAuth();
   const [form] = Form.useForm();
   const { message } = App.useApp();
-
+  const [isLoading, setIsLoading] = useState(false);
+  
   const onFinish = async (values: { email: string; password: string }) => {
+    setIsLoading(true);
     try {
       await login(values.email, values.password);
     } catch (error: any) {
       message.error(error.message || "Échec de la connexion. Veuillez vérifier vos identifiants.");
     }
   };
-  
+  if (isLoading) {
+    return <LoadingScreen tip="Connexion en cours..." />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">

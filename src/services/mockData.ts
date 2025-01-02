@@ -3,6 +3,7 @@ import { Tenant } from '../types/tenant';
 import { Lease } from '../types/lease';
 import { Payment } from '../types/payment';
 import { User } from '../types/user';
+import { Notification } from '../types/notification';
 
 export const mockUser: User = {
   id: '1',
@@ -10,6 +11,8 @@ export const mockUser: User = {
   lastName: 'Doe',
   email: 'john@example.com',
   role: 'admin',
+  permissions: ['manage_all'],
+  status: 'active',
   createdAt: '2024-01-01',
   updatedAt: '2024-01-01'
 };
@@ -42,20 +45,6 @@ export const mockProperties: Property[] = [
     image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80',
     createdAt: '2024-01-02',
     updatedAt: '2024-01-02'
-  },
-  {
-    id: '3',
-    type: 'commercial',
-    address: '78 Rue du Commerce, Paris',
-    description: 'Local commercial en centre-ville',
-    surface: 120,
-    rooms: 2,
-    condition: 'good',
-    estimatedPrice: 550000,
-    ownerId: '2',
-    image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80',
-    createdAt: '2024-01-03',
-    updatedAt: '2024-01-03'
   }
 ];
 
@@ -108,16 +97,12 @@ export const mockLeases: Lease[] = [
     tenant: {
       firstName: 'Alice',
       lastName: 'Martin'
-    },
-    owner: {
-      firstName: 'Jean',
-      lastName: 'Dupont'
     }
   },
   {
     id: '2',
     propertyId: '2',
-    tenantId: '1',
+    tenantId: '2',
     ownerId: '1',
     startDate: '2024-02-01',
     endDate: '2025-02-01',
@@ -133,82 +118,31 @@ export const mockLeases: Lease[] = [
       type: 'house'
     },
     tenant: {
-      firstName: 'Alice',
-      lastName: 'Martin'
-    },
-    owner: {
-      firstName: 'Jean',
-      lastName: 'Dupont'
-    }
-  },
-  {
-    id: '3',
-    propertyId: '3',
-    tenantId: '2',
-    ownerId: '2',
-    startDate: '2024-03-01',
-    endDate: '2025-03-01',
-    monthlyRent: 1800,
-    deposit: 3600,
-    agencyFees: 1800,
-    status: 'active',
-    documents: [],
-    createdAt: '2024-03-01',
-    updatedAt: '2024-03-01',
-    property: {
-      address: '78 Rue du Commerce, Paris',
-      type: 'commercial'
-    },
-    tenant: {
       firstName: 'Pierre',
       lastName: 'Dubois'
-    },
-    owner: {
-      firstName: 'Marie',
-      lastName: 'Laurent'
     }
   }
 ];
 
-const generatePaymentsForYear = (year: number) => {
-  const payments: Payment[] = [];
-  const months = Array.from({ length: 12 }, (_, i) => i);
-
-  mockLeases.forEach(lease => {
-    months.forEach(month => {
-      const dueDate = `${year}-${String(month + 1).padStart(2, '0')}-05`;
-      const isLate = Math.random() > 0.8;
-      const paymentDate = isLate 
-        ? `${year}-${String(month + 1).padStart(2, '0')}-${Math.floor(Math.random() * 20) + 10}`
-        : `${year}-${String(month + 1).padStart(2, '0')}-05`;
-
-      payments.push({
-        id: `${lease.id}-${year}-${month + 1}`,
-        leaseId: lease.id,
-        amount: lease.monthlyRent,
-        type: 'rent',
-        status: 'completed',
-        dueDate,
-        paymentDate,
-        paymentMethod: 'bank_transfer',
-        reference: `PAY-${year}${String(month + 1).padStart(2, '0')}`,
-        createdAt: dueDate,
-        updatedAt: paymentDate,
-        lease: {
-          property: lease.property,
-          tenant: lease.tenant,
-          monthlyRent: lease.monthlyRent
-        }
-      });
-    });
-  });
-
-  return payments;
-};
-
 export const mockPayments: Payment[] = [
-  ...generatePaymentsForYear(2023),
-  ...generatePaymentsForYear(2024)
+  {
+    id: '1',
+    leaseId: '1',
+    amount: 1200,
+    type: 'rent',
+    status: 'completed',
+    dueDate: '2024-03-05',
+    paymentDate: '2024-03-05',
+    paymentMethod: 'bank_transfer',
+    reference: 'PAY-202403',
+    createdAt: '2024-03-05',
+    updatedAt: '2024-03-05',
+    lease: {
+      property: { address: '123 Rue de la Paix, Paris' },
+      tenant: { firstName: 'Alice', lastName: 'Martin' },
+      monthlyRent: 1200
+    }
+  }
 ];
 
 export const mockStats = {
@@ -233,3 +167,41 @@ export const mockTenantStats = {
   lateTenants: Math.ceil(mockTenants.length * 0.2),
   averageIncome: mockTenants.reduce((sum, tenant) => sum + tenant.monthlyIncome, 0) / mockTenants.length
 };
+
+export const mockNotifications: Notification[] = [
+  {
+    id: '1',
+    title: 'Nouveau paiement',
+    description: 'Loyer reçu de M. Martin pour le mois de Mars',
+    time: '5 min',
+    type: 'success',
+    read: false,
+    link: '/app/rents'
+  },
+  {
+    id: '2',
+    title: 'Contrat expiré',
+    description: 'Le bail de Mme Dubois arrive à échéance dans 30 jours',
+    time: '1 heure',
+    type: 'warning',
+    read: false,
+    link: '/app/leases'
+  },
+  {
+    id: '3',
+    title: 'Maintenance requise',
+    description: 'Demande de réparation urgente - 123 rue de la Paix',
+    time: '2 heures',
+    type: 'error',
+    read: false
+  },
+  {
+    id: '4',
+    title: 'Nouveau locataire',
+    description: 'M. Bernard a complété son dossier de location',
+    time: '1 jour',
+    type: 'info',
+    read: true,
+    link: '/app/tenants'
+  }
+];

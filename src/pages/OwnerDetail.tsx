@@ -1,16 +1,40 @@
-import { useParams } from 'react-router-dom';
-import { useQuery } from 'react-query';
-import { Card, Table, Tag, Statistic, Row, Col, List, Avatar, Spin } from 'antd';
-import { User2, Mail, Phone, Building2, Euro, Wallet, Home } from 'lucide-react';
-import api from 'api';
-import dayjs from 'dayjs';
-import api from '../config/api';
+import { useParams } from "react-router-dom";
+import { useQuery } from "react-query";
+import {
+  Card,
+  Table,
+  Tag,
+  Statistic,
+  Row,
+  Col,
+  List,
+  Avatar,
+  Spin,
+  message,
+} from "antd";
+import {
+  User2,
+  Mail,
+  Phone,
+  Building2,
+  Euro,
+  Wallet,
+  Home,
+  ClipboardCopy,
+  CreditCard,
+  MapPin,
+  CheckCircle,
+} from "lucide-react";
+
+import dayjs from "dayjs";
+import api from "../config/api";
+import DocumentPreview from "../components/documents/DocumentPreview";
 
 const OwnerDetail = () => {
   const { id } = useParams();
 
   const { data: owner, isLoading: isLoadingOwner } = useQuery(
-    ['owner', id],
+    ["owner", id],
     async () => {
       const response = await api.get(`/proprietaires/${id}`);
       return response.data;
@@ -19,7 +43,7 @@ const OwnerDetail = () => {
   );
 
   const { data: properties = [], isLoading: isLoadingProperties } = useQuery(
-    ['owner-properties', id],
+    ["owner-properties", id],
     async () => {
       const response = await api.get(`/api/properties?ownerId=${id}`);
       return response.data?.properties || [];
@@ -28,7 +52,7 @@ const OwnerDetail = () => {
   );
 
   const { data: leases = [], isLoading: isLoadingLeases } = useQuery(
-    ['owner-leases', id],
+    ["owner-leases", id],
     async () => {
       const response = await api.get(`/api/leases?ownerId=${id}`);
       return response.data?.leases || [];
@@ -37,7 +61,7 @@ const OwnerDetail = () => {
   );
 
   const { data: payments = [], isLoading: isLoadingPayments } = useQuery(
-    ['owner-payments', id],
+    ["owner-payments", id],
     async () => {
       const response = await api.get(`/api/payments?ownerId=${id}`);
       return response.data?.payments || [];
@@ -45,7 +69,11 @@ const OwnerDetail = () => {
     { enabled: !!id }
   );
 
-  const isLoading = isLoadingOwner || isLoadingProperties || isLoadingLeases || isLoadingPayments;
+  const isLoading =
+    isLoadingOwner ||
+    isLoadingProperties ||
+    isLoadingLeases ||
+    isLoadingPayments;
 
   if (isLoading) {
     return (
@@ -63,49 +91,61 @@ const OwnerDetail = () => {
     );
   }
 
-  const activeLeases = leases.filter(lease => lease.status === 'active');
-  const totalRent = activeLeases.reduce((acc, lease) => acc + lease.monthlyRent, 0);
-  const agencyFeesTotal = leases.reduce((acc, lease) => acc + (lease.agencyFees || 0), 0);
+  const activeLeases = leases.filter((lease) => lease.status === "active");
+  const totalRent = activeLeases.reduce(
+    (acc, lease) => acc + lease.monthlyRent,
+    0
+  );
+  const agencyFeesTotal = leases.reduce(
+    (acc, lease) => acc + (lease.agencyFees || 0),
+    0
+  );
 
   const propertyColumns = [
     {
-      title: 'Bien',
-      key: 'property',
+      title: "Bien",
+      key: "property",
       render: (property: any) => (
         <div>
           <div className="font-medium">{property.address}</div>
-          <Tag>{property.type === 'apartment' ? 'Appartement' : 
-               property.type === 'house' ? 'Maison' : 
-               property.type === 'commercial' ? 'Local commercial' : 'Terrain'}</Tag>
+          <Tag>
+            {property.type === "apartment"
+              ? "Appartement"
+              : property.type === "house"
+              ? "Maison"
+              : property.type === "commercial"
+              ? "Local commercial"
+              : "Terrain"}
+          </Tag>
         </div>
       ),
     },
     {
-      title: 'Surface',
-      dataIndex: 'surface',
-      key: 'surface',
+      title: "Surface",
+      dataIndex: "surface",
+      key: "surface",
       render: (surface: number) => `${surface} m²`,
     },
     {
-      title: 'Prix estimé',
-      key: 'price',
+      title: "Prix estimé",
+      key: "price",
       render: (property: any) => (
         <span className="font-medium">
-          {new Intl.NumberFormat('fr-FR', {
-            style: 'currency',
-            currency: 'EUR'
+          {new Intl.NumberFormat("fr-FR", {
+            style: "currency",
+            currency: "EUR",
           }).format(property.estimatedPrice)}
         </span>
       ),
     },
     {
-      title: 'Statut location',
-      key: 'leaseStatus',
+      title: "Statut location",
+      key: "leaseStatus",
       render: (property: any) => {
         const lease = leases.find((l: any) => l.propertyId === property.id);
         return lease ? (
-          <Tag color={lease.status === 'active' ? 'green' : 'orange'}>
-            {lease.status === 'active' ? 'Loué' : 'En attente'}
+          <Tag color={lease.status === "active" ? "green" : "orange"}>
+            {lease.status === "active" ? "Loué" : "En attente"}
           </Tag>
         ) : (
           <Tag>Disponible</Tag>
@@ -113,24 +153,29 @@ const OwnerDetail = () => {
       },
     },
     {
-      title: 'Revenu mensuel',
-      key: 'monthlyIncome',
+      title: "Revenu mensuel",
+      key: "monthlyIncome",
       render: (property: any) => {
         const lease = leases.find((l: any) => l.propertyId === property.id);
-        return lease?.status === 'active' ? (
+        return lease?.status === "active" ? (
           <span className="font-medium text-green-600">
-            {new Intl.NumberFormat('fr-FR', {
-              style: 'currency',
-              currency: 'EUR'
+            {new Intl.NumberFormat("fr-FR", {
+              style: "currency",
+              currency: "EUR",
             }).format(lease.monthlyRent)}
           </span>
-        ) : '-';
+        ) : (
+          "-"
+        );
       },
     },
   ];
 
   const recentPayments = payments
-    .sort((a, b) => dayjs(b.dueDate).valueOf() - dayjs(a.dueDate).valueOf())
+    .sort(
+      (a: any, b: any) =>
+        dayjs(b.dueDate).valueOf() - dayjs(a.dueDate).valueOf()
+    )
     .slice(0, 5)
     .map((payment: any) => ({
       ...payment,
@@ -139,6 +184,11 @@ const OwnerDetail = () => {
         return p.id === lease?.propertyId;
       }),
     }));
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    message.success(`${label} copié dans le presse-papiers`);
+  };
 
   return (
     <div className="space-y-6">
@@ -154,20 +204,89 @@ const OwnerDetail = () => {
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex items-center gap-2 text-gray-600">
                 <Mail className="w-4 h-4" />
-                <a href={`mailto:${owner.email}`} className="hover:text-blue-900">
+                <a
+                  href={`mailto:${owner.email}`}
+                  className="hover:text-blue-900"
+                >
                   {owner.email}
                 </a>
               </div>
               <div className="flex items-center gap-2 text-gray-600">
                 <Phone className="w-4 h-4" />
-                <a href={`tel:${owner.telephone}`} className="hover:text-blue-900">
-                  {owner.telephone} - {owner.numero_urgence}
+                <a
+                  href={`tel:${owner.telephone}`}
+                  className="hover:text-blue-900"
+                >
+                  {owner.telephone} {owner.numero_urgence}
                 </a>
               </div>
             </div>
           </div>
         </div>
       </Card>
+
+      <Row gutter={[16, 16]}>
+        <Col xs={24} md={12}>
+          <Card
+            title={
+              <div className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-blue-900" />
+                <span>Adresse</span>
+              </div>
+            }
+            className="h-full"
+          >
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-gray-700 whitespace-pre-line">
+                {owner.adresse}
+              </p>
+              <button
+                onClick={() => copyToClipboard(owner.adresse, "Adresse")}
+                className="mt-4 flex items-center gap-2 text-blue-900 hover:text-blue-700 text-sm"
+              >
+                <ClipboardCopy className="w-4 h-4" />
+                Copier l'adresse
+              </button>
+            </div>
+          </Card>
+        </Col>
+
+        <Col xs={24} md={12}>
+          <Card
+            title={
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-blue-900" />
+                <span>Coordonnées bancaires</span>
+              </div>
+            }
+            className="h-full"
+          >
+            <div className="space-y-4">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">RIB</p>
+                    <p className="font-mono text-gray-700 tracking-wider">
+                      {owner.rib?.replace(/(\d{4})/g, "$1 ").trim()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard(owner.rib || "", "RIB")}
+                    className="flex items-center gap-1 text-blue-900 hover:text-blue-700"
+                  >
+                    <ClipboardCopy className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                Coordonnées bancaires vérifiées
+              </div>
+            </div>
+          </Card>
+        </Col>
+      </Row>
 
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={6}>
@@ -221,7 +340,7 @@ const OwnerDetail = () => {
         />
       </Card>
 
-      <Card 
+      <Card
         title="Derniers paiements"
         extra={<Tag color="blue">5 dernières transactions</Tag>}
       >
@@ -232,15 +351,18 @@ const OwnerDetail = () => {
             <List.Item>
               <List.Item.Meta
                 avatar={
-                  <Avatar icon={<Euro className="w-4 h-4" />} className="bg-blue-100" />
+                  <Avatar
+                    icon={<Euro className="w-4 h-4" />}
+                    className="bg-blue-100"
+                  />
                 }
                 title={
                   <div className="flex justify-between">
                     <span>{payment.property?.address}</span>
                     <span className="font-medium">
-                      {new Intl.NumberFormat('fr-FR', {
-                        style: 'currency',
-                        currency: 'EUR'
+                      {new Intl.NumberFormat("fr-FR", {
+                        style: "currency",
+                        currency: "EUR",
                       }).format(payment.amount)}
                     </span>
                   </div>
@@ -248,14 +370,24 @@ const OwnerDetail = () => {
                 description={
                   <div className="flex justify-between text-sm">
                     <span>
-                      {dayjs(payment.paymentDate || payment.dueDate).format('DD/MM/YYYY')}
+                      {dayjs(payment.paymentDate || payment.dueDate).format(
+                        "DD/MM/YYYY"
+                      )}
                     </span>
-                    <Tag color={
-                      payment.status === 'completed' ? 'green' :
-                      payment.status === 'pending' ? 'orange' : 'red'
-                    }>
-                      {payment.status === 'completed' ? 'Payé' :
-                       payment.status === 'pending' ? 'En attente' : 'Échoué'}
+                    <Tag
+                      color={
+                        payment.status === "completed"
+                          ? "green"
+                          : payment.status === "pending"
+                          ? "orange"
+                          : "red"
+                      }
+                    >
+                      {payment.status === "completed"
+                        ? "Payé"
+                        : payment.status === "pending"
+                        ? "En attente"
+                        : "Échoué"}
                     </Tag>
                   </div>
                 }
@@ -263,6 +395,21 @@ const OwnerDetail = () => {
             </List.Item>
           )}
         />
+      </Card>
+      <Card title="Documents">
+        <div className="space-y-4 mb-4">
+          {owner.piece_jointe.map((doc: any) => (
+            <DocumentPreview
+              key={doc.uid}
+              document={{
+                uid: doc.uid,
+                name: doc.name,
+                url: doc.url,
+                type: doc.type,
+              }}
+            />
+          ))}
+        </div>
       </Card>
     </div>
   );

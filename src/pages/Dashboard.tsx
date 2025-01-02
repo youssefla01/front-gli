@@ -1,7 +1,13 @@
+import React from 'react';
 import { Row, Col, Card, Statistic } from 'antd';
 import { Building2, Users, FileText, Wallet } from 'lucide-react';
 import { useQuery } from 'react-query';
 import axios from 'axios';
+
+import { mockNotifications } from '../services/mockData';
+import RevenueChart from '../components/dashboard/charts/RevenueChart';
+import OccupancyChart from '../components/dashboard/charts/OccupancyChart';
+import DashboardNotifications from '../components/dashboard/DashboardNotifications';
 
 const Dashboard = () => {
   const { data: stats } = useQuery('dashboard-stats', async () => {
@@ -39,7 +45,7 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <Row gutter={[16, 16]}>
+      <Row gutter={[16, 16]} className="animate-fade-in">
         {cards.map((card, index) => (
           <Col xs={24} sm={12} lg={6} key={index}>
             <Card className="h-full">
@@ -61,7 +67,20 @@ const Dashboard = () => {
         ))}
       </Row>
 
-      {/* Autres sections du tableau de bord à implémenter */}
+      <Row gutter={[16, 16]}>
+        <Col xs={24} lg={16}>
+          <RevenueChart />
+        </Col>
+        <Col xs={24} lg={8}>
+          <OccupancyChart />
+        </Col>
+      </Row>
+
+      <Row>
+        <Col xs={24}>
+          <DashboardNotifications notifications={mockNotifications} />
+        </Col>
+      </Row>
     </div>
   );
 };
